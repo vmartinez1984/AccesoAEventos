@@ -5,17 +5,19 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.Body
-import retrofit2.http.POST
+import retrofit2.http.GET
+import retrofit2.http.Query
 import xyz.vmartinez84.accesoaeventos.models.InicioDeSesionModel
 import xyz.vmartinez84.accesoaeventos.models.TokenModel
-import java.util.Date
 
-class InicioDeSesionService {
+object InicioDeSesionService {
 
-    val BASE_URL = "https://35gzj4wm-3000.usw3.devtunnels.ms/";
+    var BASE_URL = "https://utilidades.vmartinez84.xyz/"
     private val apiService: ApiService
-    // Contructor
+
+    var TokenModel : TokenModel? = null
+
+    //contructor
     init {
         val retrofit = Retrofit.Builder()
             .baseUrl(BASE_URL)
@@ -24,46 +26,31 @@ class InicioDeSesionService {
         apiService = retrofit.create(ApiService::class.java)
     }
 
-    fun iniciarSesion(inicioDeSesionModel: InicioDeSesionModel, callback: ApiCallback<TokenModel>){
-        val call = apiService.iniciarSesion(inicioDeSesionModel)
-        call.enqueue(object :Callback<TokenModel>{
-            override fun onResponse(call: Call<TokenModel>, response: Response<TokenModel>) {
-                if (response.isSuccessful) {
-                    val token = response.body()
 
-                    callback.onSuccess(token)
-                } else {
-                    callback.onError(
-                        "Error HTTP: ${response.code()}"
-                    )
+    fun iniciarSesion(inicioDeSesionModel: InicioDeSesionModel, callback: ApiCallback<TokenModel>){
+        val call = apiService.iniciarSesion(inicioDeSesionModel.correo, inicioDeSesionModel.contrasenia)
+        call.enqueue(object : Callback<TokenModel?> {
+            override fun onResponse(call: Call<TokenModel?>, response: Response<TokenModel?>) {
+                if(response.isSuccessful){
+                    TokenModel = response.body()
+                    callback.onSuccess(TokenModel as TokenModel)
+                }else{
+                    val tokenNulo = TokenModel("")
+                    callback.onSuccess(tokenNulo)
                 }
             }
 
-            override fun onFailure(call: Call<TokenModel>, t: Throwable) {
-                callback.onError(t.message?: "Error")
+            override fun onFailure(call: Call<TokenModel?>, t: Throwable) {
+                callback.onError(t.message.toString())
             }
         })
     }
 
-    // Interface interna
-    private interface ApiService {
-        @POST("login")
-        fun iniciarSesion(@Body inicioDeSesionModel: InicioDeSesionModel): Call<TokenModel>
-    }
-
-    /////////////////////////////////
-
-
-    fun iniciarSesion(inicioDeSesionModel: InicioDeSesionModel): TokenModel? {
-        var token: TokenModel? = null
-        //Envia a un servicio web las credenciales y obtiene el token
-        if(inicioDeSesionModel.usuario == "victor" && inicioDeSesionModel.contrasenia == "123456"){
-            token = TokenModel("tokenValido", Date())
-        }
-        else{
-            token = null
-        }
-
-        return token
+    interface ApiService{
+        @GET("Usuarios/Sesiones")
+        fun iniciarSesion(
+            @Query("correo") usuario: String,
+            @Query("contrasenia") contrasenia: String
+        ): Call<TokenModel>
     }
 }

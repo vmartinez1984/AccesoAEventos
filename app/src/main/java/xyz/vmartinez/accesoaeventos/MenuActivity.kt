@@ -1,5 +1,6 @@
 package xyz.vmartinez.accesoaeventos
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
@@ -12,11 +13,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.bumptech.glide.Glide
 
 class MenuActivity : AppCompatActivity() {
 
     lateinit var spinner: Spinner
-
     lateinit var imageView: ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,9 +56,14 @@ class MenuActivity : AppCompatActivity() {
                 position: Int,
                 id: Long
             ) {
+                if(position != 0){
+
                 val nombreDelEvento = lista[position]
                 Toast.makeText(this@MenuActivity,nombreDelEvento, Toast.LENGTH_LONG).show()
-                //imageView.setImageURI(archivo.toUri())
+
+                val uri = "https://utilidades.vmartinez84.xyz/api/Servicios?mensaje="+ nombreDelEvento
+                Glide.with(this@MenuActivity).load(uri).into(imageView)
+                }
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {

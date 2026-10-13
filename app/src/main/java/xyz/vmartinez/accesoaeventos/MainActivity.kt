@@ -28,7 +28,6 @@ class MainActivity : AppCompatActivity() {
     //Sesión con google
     private lateinit var credentialManager: CredentialManager
 
-    private var service = InicioDeSesionService()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,27 +46,14 @@ class MainActivity : AppCompatActivity() {
         credentialManager = CredentialManager.create(this)
     }
 
-    fun iniciarSesion(view: View) {
-        val usuario = editTextUsuario.text.toString()
-        val contrasenia = editTextContrasenia.text.toString()
-        var inicioDeSecionModel = InicioDeSesionModel(usuario, contrasenia)
-        var inicioDeSesionService = InicioDeSesionService()
-        var token = inicioDeSesionService.iniciarSesion(inicioDeSecionModel)
-        if(token == null) {
-            Toast.makeText(this, "Credenciales incorrectas", Toast.LENGTH_SHORT).show()
-        }else{
-            var intent = Intent(this, MenuActivity::class.java)
-            startActivity(intent)
-        }
-    }
 
-    fun iniciarSesion2(view: View){
+    fun iniciarSesion(view: View){
         val usuario = editTextUsuario.text.toString()
         val contrasenia = editTextContrasenia.text.toString()
         var inicioDeSecionModel = InicioDeSesionModel(usuario, contrasenia)
 
-        service.iniciarSesion(inicioDeSecionModel, object : ApiCallback<TokenModel> {
-            override fun onSuccess(tokenModel: TokenModel?) {
+        InicioDeSesionService.iniciarSesion(inicioDeSecionModel, object : ApiCallback<TokenModel> {
+            override fun onSuccess(tokenModel: TokenModel) {
                 if(tokenModel?.token.isNullOrEmpty()){
                     Toast.makeText(this@MainActivity, "Credenciales incorrectas", Toast.LENGTH_SHORT).show()
                 }else{
